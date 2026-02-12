@@ -19,19 +19,22 @@ function QuestionForm({ onQuestionGenerated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     try {
-      const response = await fetch('http://localhost:5001/api/generate-question', {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/generate-question`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(formData)
       });
-
+  
       const result = await response.json();
-
+  
       onQuestionGenerated({
+        id: result.questionId,
         text: result.question,
         type: formData.questionType,
         context: formData

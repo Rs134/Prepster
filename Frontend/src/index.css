@@ -29,12 +29,29 @@ header {
   box-shadow: 0px 1px 8px rgb(204, 204, 204);
 }
 
-.header-logo {
-  font-size: 20px;
-  font-weight: 800;
-  font-family: cursive;
+
+.logo-btn{
+  border: none;
+  cursor: pointer;
+  font-size: 2.5rem;
+  background: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   letter-spacing: 1px;
-  color: black;
+  transition: .3s all;
+  animation: bounce 1.5s ease-in-out infinite;
+}
+
+.logo-btn:hover {
+  color: #0088ff;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
 }
 
 .header-btns {
@@ -44,25 +61,24 @@ header {
   gap: 20px;
 }
 
-.acct-btn{
-  background-image: url("/user.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  
-}
-
 .btn {
   background-color:  #0088ff; 
   transition: .3s all;
-  border-radius: 100%; 
   cursor: pointer;
   border: none;
-  padding: 30px;
+  border-radius: 1rem;
+  padding: 15px 30px;
   transition: all .5s;
+  font-size: 15px;
+  font-weight: 900;
+  color: white;
 }
 
 .btn:hover {
-  transform: translateY(-8px);
+  background-color: #0077dd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 136, 255, 0.3);
+
 }
 
 .setup-container {
@@ -144,9 +160,9 @@ header {
 }
 
 .generate-btn:hover {
-  background-color: #0088ff;
+  background-color: #0077dd;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 136, 255, 0.3);
 }
 
 .generate-btn:disabled {
@@ -238,9 +254,9 @@ header {
 }
 
 .submit-btn:hover {
-  background-color: #0088ff;
+  background-color: #0077dd;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 136, 255, 0.3);
 }
 
 .submit-btn:disabled {
@@ -333,7 +349,7 @@ header {
 }
 
 .new-question-btn:hover {
-  background-color: #0088ff;
+  background-color: #0077dd;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 136, 255, 0.3);
 }

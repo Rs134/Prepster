@@ -1,11 +1,20 @@
-import { useState } from 'react';
-import './index.css';
+import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import QuestionForm from './components/QuestionForm';
 import QuestionDisplay from './components/QuestionDisplay';
 
 function App() {
   const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+
+    if (token && savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
 
   const handleQuestionGenerated = (question) => {
     setCurrentQuestion(question);
@@ -17,10 +26,10 @@ function App() {
 
   return (
     <div>
-      <Header />
+      <Header user={user} />
 
       {!currentQuestion ? (
-        <QuestionForm onQuestionGenerated={handleQuestionGenerated} />
+        <QuestionForm onQuestionGenerated={handleQuestionGenerated} user={user} />
       ) : (
         <QuestionDisplay 
           question={currentQuestion}

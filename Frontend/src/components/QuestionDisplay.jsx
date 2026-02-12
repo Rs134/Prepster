@@ -9,20 +9,22 @@ function QuestionDisplay({ question, onNewQuestion }) {
     if (!answer.trim()) return;
     
     setLoading(true);
-
+  
     try {
-      const response = await fetch('http://localhost:5001/api/evaluate-answer', {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/evaluate-answer`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
+          questionId: question.id,
           question: question.text,
-          answer: answer,
-          context: question.context
+          answer: answer
         })
       });
-
+  
       const result = await response.json();
       setFeedback(result);
     } catch (error) {
