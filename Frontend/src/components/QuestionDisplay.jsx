@@ -12,12 +12,18 @@ function QuestionDisplay({ question, onNewQuestion }) {
   
     try {
       const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Only add Authorization header if token exists
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+  
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/evaluate-answer`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: headers,
         body: JSON.stringify({
           questionId: question.id,
           question: question.text,
