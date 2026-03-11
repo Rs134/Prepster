@@ -53,7 +53,7 @@ function SignUp() {
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.user));
       
-      navigate('/');
+      navigate('/signin');
       
     } catch (error) {
       console.error('Signup error:', error);

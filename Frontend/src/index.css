@@ -38,20 +38,21 @@ header {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   letter-spacing: 1px;
   transition: .3s all;
-  animation: bounce 1.5s ease-in-out infinite;
+  animation: colorshift 2s alternate infinite;
 }
 
 .logo-btn:hover {
-  color: #0088ff;
+  animation-play-state: paused;
+  cursor: pointer;
 }
 
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
+@keyframes colorshift {
+  0% { color: #0088ff; }
+  25% { color: #009dff; }
+  50% { color: #005eff; }
+  75% { color: #1100ff; }
+  100% { color: #0088ff; }
+
 }
 
 .header-btns {
