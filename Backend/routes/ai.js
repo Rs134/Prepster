@@ -5,21 +5,20 @@ import pool from '../config/database.js';
 
 const router = express.Router();
 
-// Optional authentication middleware
 function optionalAuth(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    req.userId = null; // No user, continue as guest
+    req.userId = null; 
     return next();
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
-      req.userId = null; // Invalid token, continue as guest
+      req.userId = null;
     } else {
-      req.userId = decoded.userId; // Valid token, user is authenticated
+      req.userId = decoded.userId; 
     }
     next();
   });
@@ -53,7 +52,6 @@ router.post('/generate-question', optionalAuth, async (req, res) => {
     const data = await response.json();
     const question = data.choices[0].message.content;
 
-    // Only save to database if user is logged in
     if (req.userId) {
       const result = await pool.query(
         `INSERT INTO questions (user_id, question_text, question_type, job_role, industry, experience_level)
@@ -67,7 +65,7 @@ router.post('/generate-question', optionalAuth, async (req, res) => {
         questionId: result.rows[0].id
       });
     } else {
-      // Guest user - don't save to database
+
       res.json({ 
         question,
         questionId: null
@@ -107,7 +105,6 @@ router.post('/evaluate-answer', optionalAuth, async (req, res) => {
     const data = await response.json();
     const feedback = JSON.parse(data.choices[0].message.content);
 
-    // Only save to database if user is logged in and questionId exists
     if (req.userId && questionId) {
       await pool.query(
         `INSERT INTO answers (question_id, user_id, answer_text, score, strengths, improvements)
