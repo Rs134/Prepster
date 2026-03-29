@@ -16,7 +16,6 @@ function QuestionDisplay({ question, onNewQuestion }) {
         'Content-Type': 'application/json'
       };
       
-      // Only add Authorization header if token exists
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }

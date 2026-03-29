@@ -27,7 +27,6 @@ function App() {
   return (
     <div>
       <Header user={user} />
-
       {!currentQuestion ? (
         <QuestionForm onQuestionGenerated={handleQuestionGenerated} user={user} />
       ) : (
