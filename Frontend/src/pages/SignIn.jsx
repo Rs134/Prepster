@@ -8,6 +8,8 @@ function SignIn() {
     email: '',
     password: ''
   });
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -15,10 +17,34 @@ function SignIn() {
       ...formData,
       [e.target.name]: e.target.value
     });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: '' });
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Enter a valid email address';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
+
+    if (!validate()) return;
+
     setLoading(true);
 
     try {
@@ -36,19 +62,19 @@ function SignIn() {
       const result = await response.json();
 
       if (!response.ok) {
-        alert(result.error || 'Login failed');
+        setFormError(result.error || 'Login failed');
         setLoading(false);
         return;
       }
 
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.user));
-      
+
       navigate('/');
-      
+
     } catch (error) {
       console.error('Login error:', error);
-      alert('Login failed. Please try again.');
+      setFormError('Login failed. Please try again.');
       setLoading(false);
     }
   };
@@ -59,7 +85,9 @@ function SignIn() {
         <h2>Welcome Back</h2>
         <p className="auth-subtitle">Sign in to continue</p>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        {formError && <div className="form-error">{formError}</div>}
+
+        <form onSubmit={handleSubmit} className="auth-form" noValidate>
           <div className="form-group">
             <label>Email</label>
             <input
@@ -68,8 +96,9 @@ function SignIn() {
               placeholder="you@example.com"
               value={formData.email}
               onChange={handleChange}
-              required
+              className={errors.email ? 'input-error' : ''}
             />
+            {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
           <div className="form-group">
@@ -80,8 +109,9 @@ function SignIn() {
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
-              required
+              className={errors.password ? 'input-error' : ''}
             />
+            {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
           <button type="submit" className="btn" disabled={loading}>

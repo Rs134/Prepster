@@ -10,6 +10,8 @@ function SignUp() {
     password: '',
     confirmPassword: ''
   });
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -17,15 +19,43 @@ function SignUp() {
       ...formData,
       [e.target.name]: e.target.value
     });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: '' });
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full name is required';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Enter a valid email address';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+
+    if (formData.confirmPassword !== formData.password) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
+    setFormError('');
+
+    if (!validate()) return;
 
     setLoading(true);
 
@@ -45,19 +75,19 @@ function SignUp() {
       const result = await response.json();
 
       if (!response.ok) {
-        alert(result.error || 'Signup failed');
+        setFormError(result.error || 'Signup failed');
         setLoading(false);
         return;
       }
 
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.user));
-      
-      navigate('/signin');
-      
+
+      navigate('/');
+
     } catch (error) {
       console.error('Signup error:', error);
-      alert('Signup failed. Please try again.');
+      setFormError('Signup failed. Please try again.');
       setLoading(false);
     }
   };
@@ -68,7 +98,9 @@ function SignUp() {
         <h2>Create Account</h2>
         <p className="auth-subtitle">Sign up to start practicing</p>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        {formError && <div className="form-error">{formError}</div>}
+
+        <form onSubmit={handleSubmit} className="auth-form" noValidate>
           <div className="form-group">
             <label>Full Name</label>
             <input
@@ -77,8 +109,9 @@ function SignUp() {
               placeholder="John Doe"
               value={formData.name}
               onChange={handleChange}
-              required
+              className={errors.name ? 'input-error' : ''}
             />
+            {errors.name && <span className="field-error">{errors.name}</span>}
           </div>
 
           <div className="form-group">
@@ -89,8 +122,9 @@ function SignUp() {
               placeholder="you@example.com"
               value={formData.email}
               onChange={handleChange}
-              required
+              className={errors.email ? 'input-error' : ''}
             />
+            {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
           <div className="form-group">
@@ -101,8 +135,9 @@ function SignUp() {
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
-              required
+              className={errors.password ? 'input-error' : ''}
             />
+            {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
           <div className="form-group">
@@ -113,8 +148,9 @@ function SignUp() {
               placeholder="••••••••"
               value={formData.confirmPassword}
               onChange={handleChange}
-              required
+              className={errors.confirmPassword ? 'input-error' : ''}
             />
+            {errors.confirmPassword && <span className="field-error">{errors.confirmPassword}</span>}
           </div>
 
           <button type="submit" className="btn" disabled={loading}>

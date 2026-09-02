@@ -1,10 +1,13 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import rateLimit from 'express-rate-limit';
 import '../config/dotenv.js';
 import pool from '../config/database.js';
 
 const router = express.Router();
+
+const DUMMY_HASH = '$2b$10$CwTycUXWue0Thq9StjUM0uJ8yZjHRhX8yVzL3ZDx8yy3vP.oPZLtq';
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -23,8 +26,30 @@ function authenticateToken(req, res, next) {
   });
 }
 
-router.post('/signup', async (req, res) => {
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts — please wait a few minutes and try again.' },
+});
+
+function isValidEmail(email) {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+router.post('/signup', authLimiter, async (req, res) => {
   const { name, email, password } = req.body;
+
+  if (!name || typeof name !== 'string' || !name.trim()) {
+    return res.status(400).json({ error: 'Name is required' });
+  }
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: 'A valid email is required' });
+  }
+  if (!password || typeof password !== 'string' || password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  }
 
   try {
     const existingUser = await pool.query(
@@ -33,7 +58,7 @@ router.post('/signup', async (req, res) => {
     );
 
     if (existingUser.rows.length > 0) {
-      return res.status(400).json({ error: 'Email already exists' });
+      return res.status(400).json({ error: 'Unable to create account with the provided details' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -60,8 +85,12 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   const { email, password } = req.body;
+
+  if (!isValidEmail(email) || !password) {
+    return res.status(400).json({ error: 'Invalid email or password' });
+  }
 
   try {
     const result = await pool.query(
@@ -69,20 +98,16 @@ router.post('/login', async (req, res) => {
       [email]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(400).json({ error: 'Invalid email or password' });
-    }
-
     const user = result.rows[0];
-    const validPassword = await bcrypt.compare(password, user.password);
+    const validPassword = await bcrypt.compare(password, user ? user.password : DUMMY_HASH);
 
-    if (!validPassword) {
+    if (!user || !validPassword) {
       return res.status(400).json({ error: 'Invalid email or password' });
     }
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ 
+    res.json({
       token,
       user: {
         id: user.id,
